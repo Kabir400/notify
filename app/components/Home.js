@@ -6,9 +6,17 @@ import { toast } from "react-toastify";
 export default function Home() {
   const [permission, setPermission] = useState("default");
 
+  //set the permission
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
       setPermission(Notification.permission);
+    }
+  }, []);
+
+  //register the service worker
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js");
     }
   }, []);
 
@@ -21,9 +29,11 @@ export default function Home() {
 
   const sendNotification = async () => {
     if (permission === "granted") {
-      new Notification("Hello!", {
-        body: "This is a test notification!",
-        icon: "/android-chrome-192x192.png",
+      navigator.serviceWorker.ready.then((registration) => {
+        registration.showNotification("Hello!", {
+          body: "This is a test notification.",
+          icon: "/android-chrome-192x192.png",
+        });
       });
     } else {
       toast.error("Please enable notifications!", {
